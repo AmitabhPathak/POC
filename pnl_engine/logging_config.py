@@ -5,14 +5,17 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-LOGGER_NAME = "pnl_engine"
+DEFAULT_LOGGER_NAME = "pnl_engine"
 DEFAULT_LOG_FILE = Path("logs") / "pnl_engine.log"
+
+_active_logger_name = DEFAULT_LOGGER_NAME
 
 
 def setup_logging(
     log_file: Path | None = DEFAULT_LOG_FILE,
     level: str = "INFO",
     console: bool = False,
+    logger_name: str = DEFAULT_LOGGER_NAME,
 ) -> logging.Logger:
     """
     Configure application logging.
@@ -20,7 +23,10 @@ def setup_logging(
     Writes structured event logs to ``log_file`` by default.
     Pass ``log_file=None`` to disable file output.
     """
-    logger = logging.getLogger(LOGGER_NAME)
+    global _active_logger_name
+    _active_logger_name = logger_name
+
+    logger = logging.getLogger(logger_name)
     logger.setLevel(getattr(logging, level.upper(), logging.INFO))
     logger.handlers.clear()
     logger.propagate = False
@@ -50,4 +56,4 @@ def setup_logging(
 
 def get_logger() -> logging.Logger:
     """Return the shared PnL engine logger."""
-    return logging.getLogger(LOGGER_NAME)
+    return logging.getLogger(_active_logger_name)

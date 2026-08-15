@@ -1,0 +1,21 @@
+# PnL Engine configuration
+
+data:
+  directory: data
+  files:
+    opening_positions: opening_positions.csv
+    trades: trades.csv
+    funding: funding.csv
+    prices: prices.csv
+
+logging:
+  name: pnl_engine
+  file: logs/pnl_engine.log
+  level: INFO
+  console: false
+
+results:
+  directory: result
+  # Set to a trader id (e.g. TRADER_A) or null/omit for all traders
+  trader: TRADER_A
+  output_file: pnl_report.txt

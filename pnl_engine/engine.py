@@ -7,6 +7,7 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Union
 
+from pnl_engine.config import AppConfig, DataFilesConfig
 from pnl_engine.loader import (
     PERIOD_END,
     load_funding,
@@ -39,6 +40,13 @@ ProcessableEvent = Union[TradeEvent, FundingEvent, PriceEvent]
 
 logger = get_logger()
 
+DEFAULT_DATA_FILES = DataFilesConfig(
+    opening_positions="opening_positions.csv",
+    trades="trades.csv",
+    funding="funding.csv",
+    prices="prices.csv",
+)
+
 
 class PnLEngine:
     """Maintains position state and computes PnL incrementally."""
@@ -56,10 +64,19 @@ class PnLEngine:
     def price_store(self) -> PriceStore:
         return self._price_store
 
-    def load_from_directory(self, data_dir: Path) -> None:
+    def load_from_config(self, config: AppConfig) -> None:
+        """Bootstrap engine using paths from application config."""
+        self.load_from_directory(config.data.directory, config.data.files)
+
+    def load_from_directory(
+        self,
+        data_dir: Path,
+        files: DataFilesConfig | None = None,
+    ) -> None:
         """Bootstrap engine from CSV files."""
+        file_names = files or DEFAULT_DATA_FILES
         logger.info("Starting data load from directory: %s", data_dir.resolve())
-        opening = load_opening_positions(data_dir / "opening_positions.csv")
+        opening = load_opening_positions(data_dir / file_names.opening_positions)
         for (trader, venue, venue_account, symbol), (qty, avg) in opening.items():
             key = PositionKey(trader, venue, venue_account, symbol)
             state = self._get_or_create_position(key)
@@ -75,7 +92,7 @@ class PnLEngine:
                 avg,
             )
 
-        prices = load_prices(data_dir / "prices.csv")
+        prices = load_prices(data_dir / file_names.prices)
         loaded_prices = 0
         for price in prices:
             if self._price_store.upsert(price):
@@ -88,8 +105,8 @@ class PnLEngine:
                 )
         logger.info("Stored %d price ticks", loaded_prices)
 
-        trades = load_trades(data_dir / "trades.csv")
-        funding = load_funding(data_dir / "funding.csv")
+        trades = load_trades(data_dir / file_names.trades)
+        funding = load_funding(data_dir / file_names.funding)
 
         merged: list[ProcessableEvent] = []
         merged.extend(trades)

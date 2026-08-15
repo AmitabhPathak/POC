@@ -2,16 +2,39 @@
 
 Python implementation of the Coalesce Partners coding challenge: a simplified real-time PnL engine that maintains position state and calculates profit/loss from trading, funding, and mark-price events.
 
+## Project layout
+
+```
+├── config.yaml          # Data paths, logging, and result settings
+├── data/                # Input CSV files
+│   ├── opening_positions.csv
+│   ├── trades.csv
+│   ├── funding.csv
+│   └── prices.csv
+├── result/              # Generated PnL report output
+├── logs/                # Engine log file
+├── main.py              # CLI entry point
+├── pnl_engine/          # Core package
+└── tests/
+```
+
 ## Quick Start
 
 ```bash
 pip install -r requirements.txt
 python main.py
-python main.py --trader TRADER_A
+python main.py --trader TRADER_B
+python main.py --config /path/to/config.yaml
 python -m pytest tests/ -v
 ```
 
-Place the four CSV files (`opening_positions.csv`, `trades.csv`, `funding.csv`, `prices.csv`) in the project root or pass `--data-dir`.
+Configuration lives in `config.yaml`:
+
+- **data** — input directory and CSV file names
+- **logging** — logger name, log file path, level, console flag
+- **results** — output directory, target trader (`null` = all traders), output file name
+
+CLI `--trader` overrides `results.trader`. The report is printed to stdout and written to `result/` (default: `result/pnl_report.txt`).
 
 ## Approach
 
@@ -19,6 +42,7 @@ The solution is organized as a small Python package (`pnl_engine/`) with clear s
 
 | Module | Responsibility |
 |--------|----------------|
+| `config.py` | Load `config.yaml` (paths, logging, results) |
 | `models.py` | Typed events, position keys, report dataclasses |
 | `price_store.py` | Mark-price series with as-of lookup |
 | `position.py` | Weighted-average cost basis and realized PnL |
@@ -79,13 +103,14 @@ All monetary calculations use Python `Decimal` to avoid floating-point drift. In
 ## Incremental Processing
 
 ```python
-from pnl_engine import PnLEngine, TradeEvent, ...
+from pnl_engine import PnLEngine, load_config
 
+config = load_config()
 engine = PnLEngine()
-engine.load_from_directory(Path("."))   # initial bootstrap
+engine.load_from_config(config)
 
 changed = engine.process(new_trade)      # in-order live event
-report = engine.report()               # end-of-period view
+report = engine.report(trader=config.results.trader)
 ```
 
 - Initial load deduplicates and processes events in timestamp order (trades before funding at the same timestamp).

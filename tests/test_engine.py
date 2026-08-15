@@ -19,7 +19,7 @@ from pnl_engine.models import (
     TradeEvent,
 )
 
-DATA_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 UTC = timezone.utc
 
 

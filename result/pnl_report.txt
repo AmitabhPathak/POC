@@ -1,0 +1,39 @@
+TRADER_A
+BTCUSDT
+Final Quantity	2.125
+Realized PnL	+528.22
+Unrealized PnL	+238.95
+Funding PnL	-5.04
+Fees	727.20
+--------------------------------
+Total PnL	+34.93
+
+TRADER_A
+ETHUSDT
+Final Quantity	5.5
+Realized PnL	+33.28
+Unrealized PnL	-2.64
+Funding PnL	-0.42
+Fees	48.80
+--------------------------------
+Total PnL	-18.57
+
+TRADER_A
+SOLUSDT
+Final Quantity	-20
+Realized PnL	+2.23
+Unrealized PnL	-10.20
+Funding PnL	+1.01
+Fees	65.09
+--------------------------------
+Total PnL	-72.05
+
+TRADER_A
+XRPUSDT
+Final Quantity	4750
+Realized PnL	+211.66
+Unrealized PnL	+18.46
+Funding PnL	-0.11
+Fees	22.42
+--------------------------------
+Total PnL	+207.60
